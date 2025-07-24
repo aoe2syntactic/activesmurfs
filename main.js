@@ -67,7 +67,7 @@ async function fetchActivityData(name, ids) {
         const activeIds = new Set()
         const activeStatGroups = new Set()
         data.leaderboardStats.filter(s => s.leaderboard_id == 3).forEach(s => {
-            if (Date.now() - (s.lastmatchdate * 1000) <= (7 * 86400 * 1000)) {
+            if (Date.now() - (s.lastmatchdate * 1000) <= (14 * 86400 * 1000)) {
                 activeStatGroups.add(s.statgroup_id)
             }
         })
