@@ -3,6 +3,7 @@ const accountList = document.querySelector("#accounts");
 const logArea = document.querySelector("#log");
 const output = document.querySelector("#output");
 const statusElement = document.querySelector("#status");
+const weekSelector = document.querySelector("#weekSelector");
 
 function log(message) {
     logArea.textContent += message + '\n'
@@ -32,7 +33,7 @@ async function loadReferenceData() {
 }
 
 async function fetchSmurfData(name, id) {
-    request = new Request('https://corsproxy.io/?url=https://smurf.new-chapter.eu/api/check_player?player_id=' + id, { cache: "no-cache" })
+    request = new Request('https://corsproxy.io/?url=https://smurf.new-chapter.eu/api/check_player?player_id=' + id)
 
     try {
         const response = await fetch(request);
@@ -53,7 +54,7 @@ async function fetchSmurfData(name, id) {
 }
 
 async function fetchActivityData(name, ids) {
-    request = new Request(`https://corsproxy.io/?url=https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`, { cache: "no-cache" })
+    request = new Request(`https://corsproxy.io/?url=https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`)
 
     try {
         const response = await fetch(request);
@@ -64,21 +65,12 @@ async function fetchActivityData(name, ids) {
 
         if (data.result.code != 0) throw new Error(data.result.message);
 
-        const activeIds = new Set()
-        const activeStatGroups = new Set()
-        data.leaderboardStats.filter(s => s.leaderboard_id == 3).forEach(s => {
-            if (Date.now() - (s.lastmatchdate * 1000) <= (14 * 86400 * 1000)) {
-                activeStatGroups.add(s.statgroup_id)
-            }
+        const latestDatePerGroup = new Map()
+        data.leaderboardStats.forEach(s => {
+            latestDatePerGroup.set(s.statgroup_id, Math.max(latestDatePerGroup.get(s.statgroup_id) ?? 0, s.lastmatchdate * 1000))
         })
-
-        data.statGroups.forEach(s => {
-            if (activeStatGroups.has(s.id)) {
-                activeIds.add(s.members[0].profile_id.toString())
-            }
-        })
-
-        return activeIds
+        const activity = new Map(data.statGroups.map(s => [s.members[0].profile_id.toString(), latestDatePerGroup.get(s.id)]))
+        return activity
     } catch (error) {
         log('Failed to retrieve reference data:')
         log(error);
@@ -86,6 +78,26 @@ async function fetchActivityData(name, ids) {
 }
 
 const delay = ms => new Promise(res => setTimeout(res, ms * 1000));
+
+function createHighlights() {
+    weeks = weekSelector.value
+
+    output.querySelectorAll('li span').forEach(el => {
+        if (Date.now() - el.dataset['lastmatch'] < weeks * 7 * 86400 * 1000) {
+            el.classList.add('text-success')
+        } else {
+            el.classList.remove('text-success')
+        }
+    })
+
+    output.querySelectorAll('li').forEach(el => {
+        if (el.querySelectorAll('span.text-success').length > 1) {
+            el.classList.add('text-bg-danger')
+        } else {
+            el.classList.remove('text-bg-danger')
+        }
+    })
+}
 
 async function run() {
     reset()
@@ -160,31 +172,28 @@ async function run() {
         }
 
         log('Checking for account activity...')
-        const activeIds = await fetchActivityData(data.name, Array.from(data.ids))
+        const lastMatchData = await fetchActivityData(data.name, Array.from(data.ids))
 
         const li = document.createElement('li')
         li.innerText = `${data.name}: `
         Array.from(data.ids).forEach(id => {
             const s = document.createElement('span')
             s.innerText = id
-            if (activeIds.has(id)) s.classList.add('text-success')
+            s.dataset['lastmatch'] = lastMatchData.get(id)
+            s.title = (new Date(lastMatchData.get(id)))
             li.appendChild(s)
             li.append(", ")
         })
         li.classList.add('list-group-item')
 
-        if (activeIds.size > 1) {
-            li.classList.add('text-bg-danger')
-        }
-
         output.appendChild(li)
-
-        await delay(5)
         log('')
     }
 
     statusElement.classList.add('hidden')
+    createHighlights()
     log('Done.')
 }
 
 startButton.addEventListener("click", run);
+weekSelector.addEventListener("input", createHighlights)
