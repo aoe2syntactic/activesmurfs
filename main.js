@@ -33,7 +33,8 @@ async function loadReferenceData() {
 }
 
 async function fetchSmurfData(name, id) {
-    request = new Request('https://corsproxy.io/?url=https://smurf.new-chapter.eu/api/check_player?player_id=' + id)
+    const url = `https://smurf.new-chapter.eu/api/check_player?player_id=${id}`
+    request = new Request(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
 
     try {
         const response = await fetch(request);
@@ -54,7 +55,8 @@ async function fetchSmurfData(name, id) {
 }
 
 async function fetchActivityData(name, ids) {
-    request = new Request(`https://corsproxy.io/?url=https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`)
+    const url = `https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`
+    request = new Request(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
 
     try {
         const response = await fetch(request);
