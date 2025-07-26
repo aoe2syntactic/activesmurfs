@@ -54,7 +54,8 @@ async function fetchSmurfData(name, id) {
     }
 }
 
-async function fetchActivityData(name, ids) {
+async function fetchActivityData(input) {
+    const ids = Array.from(input.ids)
     const url = `https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`
     request = new Request(`https://corsproxy.io/?url=${encodeURIComponent(url)}`)
 
@@ -66,6 +67,7 @@ async function fetchActivityData(name, ids) {
         const data = await response.json()
 
         if (data.result.code != 0) throw new Error(data.result.message);
+        input.name = input.name ?? data.statGroups[0].members[0].alias
 
         const latestDatePerGroup = new Map()
         data.leaderboardStats.forEach(s => {
@@ -174,7 +176,7 @@ async function run() {
         }
 
         log('Checking for account activity...')
-        const lastMatchData = await fetchActivityData(data.name, Array.from(data.ids))
+        const lastMatchData = await fetchActivityData(data)
 
         const li = document.createElement('li')
         li.innerText = `${data.name}: `
