@@ -33,7 +33,7 @@ async function loadReferenceData() {
 }
 
 async function fetchSmurfData(name, id) {
-    const url = `https://smurf.new-chapter.eu/api/check_player?player_id=${id}`
+    const url = `https://aoe.mbergen.de/api/snc/${id}`
     request = new Request(`https://corsproxy.io/?url=${encodeURIComponent(url)}`)
 
     try {
@@ -56,7 +56,7 @@ async function fetchSmurfData(name, id) {
 
 async function fetchActivityData(input) {
     const ids = Array.from(input.ids)
-    const url = `https://aoe-api.worldsedgelink.com/community/leaderboard/GetPersonalStat?title=age2&profile_ids=[${ids.join(',')}]`
+    const url = `https://aoe.mbergen.de/api/wel/getPersonalStat?profiles=${ids.join('&profiles=')}`
     request = new Request(`https://corsproxy.io/?url=${encodeURIComponent(url)}`)
 
     try {
