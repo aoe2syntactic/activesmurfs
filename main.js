@@ -34,7 +34,7 @@ async function loadReferenceData() {
 
 async function fetchSmurfData(name, id) {
     const url = `https://aoe.mbergen.de/api/snc/${id}`
-    request = new Request(`https://corsproxy.io/?url=${encodeURIComponent(url)}`)
+    request = new Request(url)
 
     try {
         const response = await fetch(request);
@@ -57,7 +57,7 @@ async function fetchSmurfData(name, id) {
 async function fetchActivityData(input) {
     const ids = Array.from(input.ids)
     const url = `https://aoe.mbergen.de/api/wel/getPersonalStat?profiles=${ids.join('&profiles=')}`
-    request = new Request(`https://corsproxy.io/?url=${encodeURIComponent(url)}`)
+    request = new Request(url)
 
     try {
         const response = await fetch(request);
