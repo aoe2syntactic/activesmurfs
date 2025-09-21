@@ -45,6 +45,11 @@ async function fetchSmurfData(name, id) {
 
         if (data.truncated) log(`Smurf response for ${name} (${id}) was truncated. Please report to SyntacticSalt.`);
 
+        if (!data.smurfs) {
+            log(`Did not receive a smurf response.`);
+            return;
+        }
+
         if (data.smurfs.length > 1) log(`Smurf response for ${name} (${id}) contained unexpected entries. Please report to SyntacticSalt.`);
 
         return data.smurfs[0]
