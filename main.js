@@ -86,7 +86,6 @@ async function fetchActivityData(input) {
     }
 }
 
-const delay = ms => new Promise(res => setTimeout(res, ms * 1000));
 
 function createHighlights() {
     weeks = weekSelector.value
@@ -170,7 +169,6 @@ async function run() {
             checkedIds.add(id)
 
             const smurfData = await fetchSmurfData(data.name, id)
-            await delay(6)
 
             if (!smurfData) continue;
 
